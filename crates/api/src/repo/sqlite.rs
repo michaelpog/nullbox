@@ -22,6 +22,8 @@ struct TicketRow {
     subject: String,
     body: String,
     severity: String,
+    category: Option<String>,
+    preferred_time: Option<String>,
     status: String,
     customer_name: Option<String>,
     customer_email: Option<String>,
@@ -49,6 +51,8 @@ impl TryFrom<TicketRow> for Ticket {
             subject: row.subject,
             body: row.body,
             severity: row.severity.parse().map_err(corrupt)?,
+            category: row.category.as_deref().map(str::parse).transpose().map_err(corrupt)?,
+            preferred_time: row.preferred_time.as_deref().map(str::parse).transpose().map_err(corrupt)?,
             status: row.status.parse().map_err(corrupt)?,
             customer_name: row.customer_name,
             customer_email: row.customer_email,
@@ -98,6 +102,8 @@ impl TicketRepository for SqliteTicketRepository {
     async fn create_ticket(&self, new: NewTicket) -> Result<Ticket, RepoError> {
         let id = new.id.to_string();
         let severity = new.severity.as_str();
+        let category = new.category.map(|c| c.as_str());
+        let preferred_time = new.preferred_time.map(|t| t.as_str());
         let status = TicketStatus::Open.as_str();
         let (anon_animal, anon_number) = match &new.anon {
             Some(anon) => (Some(anon.animal.as_str()), Some(i64::from(anon.number))),
@@ -106,14 +112,16 @@ impl TicketRepository for SqliteTicketRepository {
         // Number allocation is SQLite-specific: a single INSERT holds the write
         // lock, so MAX + 1 can't race. On Postgres, use a sequence instead.
         let number = sqlx::query_scalar!(
-            r#"INSERT INTO tickets (id, number, subject, body, severity, status, customer_name, customer_email,
+            r#"INSERT INTO tickets (id, number, subject, body, severity, category, preferred_time, status, customer_name, customer_email,
                                    anon_animal, anon_number, access_token_hash, created_at, updated_at)
-               VALUES (?, (SELECT COALESCE(MAX(number), 0) + 1 FROM tickets), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               VALUES (?, (SELECT COALESCE(MAX(number), 0) + 1 FROM tickets), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                RETURNING number"#,
             id,
             new.subject,
             new.body,
             severity,
+            category,
+            preferred_time,
             status,
             new.customer_name,
             new.customer_email,
@@ -132,6 +140,8 @@ impl TicketRepository for SqliteTicketRepository {
             subject: new.subject,
             body: new.body,
             severity: new.severity,
+            category: new.category,
+            preferred_time: new.preferred_time,
             status: TicketStatus::Open,
             customer_name: new.customer_name,
             customer_email: new.customer_email,
@@ -147,7 +157,7 @@ impl TicketRepository for SqliteTicketRepository {
         let id = id.to_string();
         sqlx::query_as!(
             TicketRow,
-            r#"SELECT id, number, subject, body, severity, status, customer_name, customer_email, anon_animal,
+            r#"SELECT id, number, subject, body, severity, category, preferred_time, status, customer_name, customer_email, anon_animal,
                       anon_number, assignee_name, created_at AS "created_at: DateTime<Utc>",
                       updated_at AS "updated_at: DateTime<Utc>", closed_at AS "closed_at: DateTime<Utc>"
                FROM tickets WHERE id = ?"#,
@@ -162,7 +172,7 @@ impl TicketRepository for SqliteTicketRepository {
     async fn get_ticket_by_token(&self, token_hash: &str) -> Result<Option<Ticket>, RepoError> {
         sqlx::query_as!(
             TicketRow,
-            r#"SELECT id, number, subject, body, severity, status, customer_name, customer_email, anon_animal,
+            r#"SELECT id, number, subject, body, severity, category, preferred_time, status, customer_name, customer_email, anon_animal,
                       anon_number, assignee_name, created_at AS "created_at: DateTime<Utc>",
                       updated_at AS "updated_at: DateTime<Utc>", closed_at AS "closed_at: DateTime<Utc>"
                FROM tickets WHERE access_token_hash = ?"#,
@@ -179,7 +189,7 @@ impl TicketRepository for SqliteTicketRepository {
         let statuses = serde_json::to_string(statuses).map_err(corrupt)?;
         sqlx::query_as!(
             TicketRow,
-            r#"SELECT id, number, subject, body, severity, status, customer_name, customer_email, anon_animal,
+            r#"SELECT id, number, subject, body, severity, category, preferred_time, status, customer_name, customer_email, anon_animal,
                       anon_number, assignee_name, created_at AS "created_at: DateTime<Utc>",
                       updated_at AS "updated_at: DateTime<Utc>", closed_at AS "closed_at: DateTime<Utc>"
                FROM tickets WHERE status IN (SELECT value FROM json_each(?))

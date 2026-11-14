@@ -13,4 +13,4 @@ pub use anon::{ANON_ANIMALS, AnonIdentity};
 pub use beast::BeastMood;
 pub use event::{DomainEvent, SystemEvent};
 pub use status::{InvalidTransition, TicketStatus};
-pub use ticket::{AuthorKind, Message, Severity, Ticket};
+pub use ticket::{AuthorKind, Category, Message, PreferredTime, Severity, Ticket};

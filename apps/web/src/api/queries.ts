@@ -1,9 +1,10 @@
 /** TanStack Query hooks on top of the API client. */
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
 import type { TicketStatus } from "./generated/TicketStatus";
 import type { UpdateTicketRequest } from "./generated/UpdateTicketRequest";
 import type { WorkerMessageRequest } from "./generated/WorkerMessageRequest";
+import type { MyTicket } from "./myTickets";
 
 export const keys = {
   backlog: ["backlog"] as const,
@@ -33,6 +34,17 @@ export function useCustomerTicket(id: string, token: string | null) {
     queryKey: keys.customerTicket(id),
     queryFn: () => api.getCustomerTicket(id, token ?? ""),
     enabled: Boolean(token),
+  });
+}
+
+/** Every ticket this device created, each read with its own secret token. */
+export function useMyTicketThreads(tickets: MyTicket[]) {
+  return useQueries({
+    queries: tickets.map((t) => ({
+      queryKey: keys.customerTicket(t.id),
+      queryFn: () => api.getCustomerTicket(t.id, t.token),
+      refetchInterval: 30_000,
+    })),
   });
 }
 

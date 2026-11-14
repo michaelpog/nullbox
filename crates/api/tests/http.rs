@@ -156,3 +156,49 @@ async fn admin_export_needs_the_admin_token() {
     assert_eq!(status, StatusCode::OK);
     assert_eq!(tickets[0]["customer_email"], "a@example.com");
 }
+
+#[tokio::test]
+async fn ticket_keeps_its_category_and_preferred_time() {
+    let app = app().await;
+
+    let (status, created) = send(
+        &app,
+        "POST",
+        "/api/tickets",
+        &[],
+        Some(json!({
+            "subject": "Sink drains at geological speed",
+            "body": "Since Monday.",
+            "severity": "p3",
+            "category": "plumbing",
+            "preferred_time": "weekday_morning",
+        })),
+    )
+    .await;
+    assert_eq!(status, StatusCode::CREATED);
+    assert_eq!(created["ticket"]["category"], "plumbing");
+    assert_eq!(created["ticket"]["preferred_time"], "weekday_morning");
+
+    // Read back from storage, not just echoed from the request.
+    let id = created["ticket"]["id"].as_str().unwrap();
+    let (_, thread) = send(&app, "GET", &format!("/api/tickets/{id}"), &[WORKER], None).await;
+    assert_eq!(thread["ticket"]["category"], "plumbing");
+    assert_eq!(thread["ticket"]["preferred_time"], "weekday_morning");
+
+    // Unknown values are rejected, not stored.
+    let (status, error) = send(
+        &app,
+        "POST",
+        "/api/tickets",
+        &[],
+        Some(json!({ "subject": "x", "body": "y", "severity": "p4", "category": "astrology" })),
+    )
+    .await;
+    assert_eq!((status, &error["code"]), (StatusCode::UNPROCESSABLE_ENTITY, &json!("validation_failed")));
+
+    // Old clients that send neither still work; the fields come back as null.
+    let (status, created) =
+        send(&app, "POST", "/api/tickets", &[], Some(json!({ "subject": "x", "body": "y", "severity": "p4" }))).await;
+    assert_eq!(status, StatusCode::CREATED);
+    assert_eq!(created["ticket"]["category"], Value::Null);
+}

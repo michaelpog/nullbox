@@ -38,6 +38,75 @@ impl std::str::FromStr for Severity {
     }
 }
 
+/// What kind of job it is. Decides which handymen can take it. Labels are UI-only.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum Category {
+    Plumbing,
+    Electrical,
+    Gas,
+    AirConditioning,
+    Moving,
+}
+
+impl Category {
+    pub const ALL: [Category; 5] = [Self::Plumbing, Self::Electrical, Self::Gas, Self::AirConditioning, Self::Moving];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Plumbing => "plumbing",
+            Self::Electrical => "electrical",
+            Self::Gas => "gas",
+            Self::AirConditioning => "air_conditioning",
+            Self::Moving => "moving",
+        }
+    }
+}
+
+impl std::str::FromStr for Category {
+    type Err = UnknownVariant;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::ALL.into_iter().find(|category| category.as_str() == s).ok_or_else(|| UnknownVariant(s.to_owned()))
+    }
+}
+
+/// When the customer would like the visit.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum PreferredTime {
+    WeekdayMorning,
+    WeekdayAfternoon,
+    WeekdayEvening,
+    Weekend,
+    AnyTime,
+}
+
+impl PreferredTime {
+    pub const ALL: [PreferredTime; 5] =
+        [Self::WeekdayMorning, Self::WeekdayAfternoon, Self::WeekdayEvening, Self::Weekend, Self::AnyTime];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::WeekdayMorning => "weekday_morning",
+            Self::WeekdayAfternoon => "weekday_afternoon",
+            Self::WeekdayEvening => "weekday_evening",
+            Self::Weekend => "weekend",
+            Self::AnyTime => "any_time",
+        }
+    }
+}
+
+impl std::str::FromStr for PreferredTime {
+    type Err = UnknownVariant;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::ALL.into_iter().find(|time| time.as_str() == s).ok_or_else(|| UnknownVariant(s.to_owned()))
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(rename_all = "snake_case")]
 #[ts(export)]
@@ -80,6 +149,9 @@ pub struct Ticket {
     pub subject: String,
     pub body: String,
     pub severity: Severity,
+    /// Null for tickets created before categories existed.
+    pub category: Option<Category>,
+    pub preferred_time: Option<PreferredTime>,
     pub status: TicketStatus,
     pub customer_name: Option<String>,
     pub customer_email: Option<String>,

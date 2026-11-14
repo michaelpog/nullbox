@@ -52,6 +52,8 @@ impl TicketService {
                 subject,
                 body,
                 severity: req.severity,
+                category: req.category,
+                preferred_time: req.preferred_time,
                 customer_name,
                 customer_email,
                 anon,
