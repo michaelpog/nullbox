@@ -1,16 +1,20 @@
-/* Design tokens. Every color, size and font lives here. */
+/* Design tokens. Every color, size and font lives here.
+   Look: "Osaka Handy Helpers" (olive, cream and workshop brown; Inter + Zilla Slab). */
 :root {
   color-scheme: light;
   --font-sans:
-    system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
-    "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
+    Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
+  --font-display:
+    "Zilla Slab", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Georgia, serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --text-xs: 0.75rem;
+  --text-xs: 0.8125rem;
   --text-sm: 0.875rem;
   --text-md: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.6rem;
+  --text-lg: 1.5rem;
+  --text-xl: 2rem;
+  --text-2xl: clamp(2rem, 1.4rem + 2.4vw, 3rem);
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -19,66 +23,95 @@
   --space-5: 1.5rem;
   --space-6: 3rem;
 
-  --radius: 0.5rem;
-  --radius-lg: 0.9rem;
-  --shadow: 0 6px 24px rgb(0 0 0 / 0.15);
+  --control-height: 3rem;
+  --touch-target: 2.75rem;
+  --radius: 0.625rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --shadow: 0 10px 30px rgb(62 44 30 / 0.08);
 
-  --color-bg: #f6f5fb;
-  --color-surface: #ffffff;
-  --color-surface-2: #eceaf5;
-  --color-border: #dcd8ea;
-  --color-text: #1d1a2b;
-  --color-muted: #6a6582;
-  --color-accent: #6d4aff;
-  --color-accent-bg: #efeaff;
-  --color-note-bg: #fff6d6;
-  --color-danger: #c9264b;
-  --color-danger-bg: #ffe6ec;
-  --color-shadow: rgb(29 26 43 / 0.15);
+  --color-bg: #f4f1e6;
+  --color-surface: #fffdf7;
+  --color-surface-2: #ece7d8;
+  --color-input: #ffffff;
+  --color-border: #e2dccb;
+  --color-border-strong: #cfc6b2;
+  --color-text: #3e2c1e;
+  --color-muted: #6e5a45;
+  --color-accent: #5e6b2f;
+  --color-accent-strong: #3f4a1c;
+  --color-on-accent: #fffdf7;
+  --color-accent-bg: #eef1e2;
+  --color-ink-panel: #3e2c1e;
+  --color-on-ink-panel: #f4f1e6;
+  --color-note-bg: #f3e3c3;
+  --color-danger: #6b2412;
+  --color-danger-bg: #fbe3d9;
+  --color-shadow: rgb(62 44 30 / 0.15);
 
-  --status-open: #d7f5e3;
-  --status-progress: #dbe8ff;
-  --status-waiting: #fff0c2;
-  --status-resolved: #ece3ff;
-  --status-closed: #4b4560;
+  --status-open: #f3e3c3;
+  --status-progress: #dde6c6;
+  --status-waiting: #e6dccf;
+  --status-resolved: #d6e5d0;
+  --status-closed: #4a3524;
+  --status-closed-fg: #fffdf7;
 
-  --sev-p1: #e0303f;
-  --sev-p2: #ffb4a8;
-  --sev-p3: #ffe3a3;
-  --sev-p4: #dde4ea;
+  --sev-p1: #a8402c;
+  --sev-p1-fg: #fffdf7;
+  --sev-p2: #f2c4a8;
+  --sev-p3: #efe2b0;
+  --sev-p4: #e6e1d6;
 
-  --aging-yellow: #fdf6dc;
+  --aging-yellow: #f7efd6;
   --aging-stone: #e6e1d6;
 
-  --beast-body: #8fd694;
-  --beast-angry: #f4a259;
-  --beast-kaiju: #6a3fb5;
-  --beast-ink: #1d1a2b;
+  /* Handyman Beast */
+  --beast-happy: #a9bf78;
+  --beast-busy: #cfc38a;
+  --beast-grumpy: #d99a5b;
+  --beast-furious: #c9553f;
+  --beast-ink: #3e2c1e;
+  --beast-gold: #e9b949;
+  --beast-gold-dark: #d9a43a;
+  --beast-wood: #8a5a35;
+  --beast-wood-light: #a06a40;
+  --beast-wood-dark: #7a5a3c;
+  --beast-steel: #6b6f72;
+  --beast-steam: #9a8f80;
+  --beast-vein: #b23a2a;
+  --beast-blush: #e59a8a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --color-bg: #15131f;
-    --color-surface: #1f1c2c;
-    --color-surface-2: #2b2740;
-    --color-border: #39334f;
-    --color-text: #ece9f7;
-    --color-muted: #a49fbd;
-    --color-accent: #8f73ff;
-    --color-accent-bg: #2c2550;
+    --color-bg: #1c1712;
+    --color-surface: #26201a;
+    --color-surface-2: #332a21;
+    --color-input: #1c1712;
+    --color-border: #4a3f33;
+    --color-border-strong: #5e5141;
+    --color-text: #f4f1e6;
+    --color-muted: #c2b49e;
+    --color-accent: #b5c98a;
+    --color-accent-strong: #d3e2ad;
+    --color-on-accent: #1c1712;
+    --color-accent-bg: #2f3520;
+    --color-ink-panel: #332a21;
+    --color-on-ink-panel: #f4f1e6;
     --color-note-bg: #3b3420;
-    --color-danger: #ff6b8a;
-    --color-danger-bg: #3d1a24;
+    --color-danger: #ff9c85;
+    --color-danger-bg: #3d2018;
     --color-shadow: rgb(0 0 0 / 0.4);
-    --status-open: #1f4a33;
-    --status-progress: #233a63;
-    --status-waiting: #5a4a17;
-    --status-resolved: #3c2f6b;
-    --status-closed: #0c0a12;
+    --shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+    --status-open: #5a4a17;
+    --status-progress: #3a4723;
+    --status-waiting: #4a3a2a;
+    --status-resolved: #2f4a2a;
+    --status-closed: #0f0c09;
     --sev-p2: #7a3a30;
     --sev-p3: #6a5420;
-    --sev-p4: #3a4048;
+    --sev-p4: #3a352c;
     --aging-yellow: #2e2a1a;
     --aging-stone: #2a2722;
   }

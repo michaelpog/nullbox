@@ -7,7 +7,8 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-5);
+  box-shadow: var(--shadow);
+  padding: clamp(var(--space-5), 4vw, 2.25rem);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -15,13 +16,14 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  max-width: 44rem;
+  gap: var(--space-5);
+  max-width: 48rem;
 }
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
+  font-size: 0.9375rem;
   font-weight: 600;
 }
 .row {
@@ -40,7 +42,8 @@
 }
 .intro {
   color: var(--color-muted);
-  margin: 0;
+  font-size: 1.0625rem;
+  margin: var(--space-2) 0 0;
 }
 .linkBox {
   display: flex;
@@ -250,5 +253,5 @@
 }
 .tabs button[aria-pressed="true"] {
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-on-accent);
 }
