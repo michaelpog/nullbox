@@ -1,6 +1,6 @@
 //! Request/response bodies. Exported to TypeScript by `cargo test`.
 
-use nullbox_domain::{BeastMood, Message, Severity, Ticket, TicketStatus};
+use nullbox_domain::{BeastMood, Category, Message, PreferredTime, Severity, Ticket, TicketStatus};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
@@ -10,6 +10,13 @@ pub struct CreateTicketRequest {
     pub subject: String,
     pub body: String,
     pub severity: Severity,
+    /// Optional so older clients keep working; the web app always sends it.
+    #[serde(default)]
+    #[ts(optional)]
+    pub category: Option<Category>,
+    #[serde(default)]
+    #[ts(optional)]
+    pub preferred_time: Option<PreferredTime>,
     /// Leave both name and email out to stay anonymous.
     #[serde(default)]
     #[ts(optional)]

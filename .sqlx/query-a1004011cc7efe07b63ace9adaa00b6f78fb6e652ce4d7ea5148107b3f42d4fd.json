@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, number, subject, body, severity, status, customer_name, customer_email, anon_animal,\n                      anon_number, assignee_name, created_at AS \"created_at: DateTime<Utc>\",\n                      updated_at AS \"updated_at: DateTime<Utc>\", closed_at AS \"closed_at: DateTime<Utc>\"\n               FROM tickets WHERE status IN (SELECT value FROM json_each(?))\n               ORDER BY number",
+  "query": "SELECT id, number, subject, body, severity, category, preferred_time, status, customer_name, customer_email, anon_animal,\n                      anon_number, assignee_name, created_at AS \"created_at: DateTime<Utc>\",\n                      updated_at AS \"updated_at: DateTime<Utc>\", closed_at AS \"closed_at: DateTime<Utc>\"\n               FROM tickets WHERE id = ?",
   "describe": {
     "columns": [
       {
@@ -59,8 +59,30 @@
         }
       },
       {
-        "name": "status",
+        "name": "category",
         "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "category"
+          }
+        }
+      },
+      {
+        "name": "preferred_time",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tickets",
+            "name": "preferred_time"
+          }
+        }
+      },
+      {
+        "name": "status",
+        "ordinal": 7,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -71,7 +93,7 @@
       },
       {
         "name": "customer_name",
-        "ordinal": 6,
+        "ordinal": 8,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -82,7 +104,7 @@
       },
       {
         "name": "customer_email",
-        "ordinal": 7,
+        "ordinal": 9,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -93,7 +115,7 @@
       },
       {
         "name": "anon_animal",
-        "ordinal": 8,
+        "ordinal": 10,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -104,7 +126,7 @@
       },
       {
         "name": "anon_number",
-        "ordinal": 9,
+        "ordinal": 11,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -115,7 +137,7 @@
       },
       {
         "name": "assignee_name",
-        "ordinal": 10,
+        "ordinal": 12,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -126,7 +148,7 @@
       },
       {
         "name": "created_at: DateTime<Utc>",
-        "ordinal": 11,
+        "ordinal": 13,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -137,7 +159,7 @@
       },
       {
         "name": "updated_at: DateTime<Utc>",
-        "ordinal": 12,
+        "ordinal": 14,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -148,7 +170,7 @@
       },
       {
         "name": "closed_at: DateTime<Utc>",
-        "ordinal": 13,
+        "ordinal": 15,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -167,6 +189,8 @@
       false,
       false,
       false,
+      true,
+      true,
       false,
       true,
       true,
@@ -178,5 +202,5 @@
       true
     ]
   },
-  "hash": "13009d6995d19c5851a75fdb9c22330070aa1c6d7965ec3dec66c64c07eb9c5e"
+  "hash": "a1004011cc7efe07b63ace9adaa00b6f78fb6e652ce4d7ea5148107b3f42d4fd"
 }

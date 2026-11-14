@@ -5,7 +5,7 @@ mod sqlite;
 
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use nullbox_domain::{AnonIdentity, Message, Severity, Ticket, TicketStatus};
+use nullbox_domain::{AnonIdentity, Category, Message, PreferredTime, Severity, Ticket, TicketStatus};
 use uuid::Uuid;
 
 pub use sqlite::SqliteTicketRepository;
@@ -25,6 +25,8 @@ pub struct NewTicket {
     pub subject: String,
     pub body: String,
     pub severity: Severity,
+    pub category: Option<Category>,
+    pub preferred_time: Option<PreferredTime>,
     pub customer_name: Option<String>,
     pub customer_email: Option<String>,
     pub anon: Option<AnonIdentity>,
