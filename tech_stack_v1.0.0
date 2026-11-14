@@ -1,0 +1,41 @@
+NULLBOX — FASTHACKS #2: $0 IMPLEMENTATION PLAN
+14 Nov 2026 | github.com/michaelpog/nullbox
+Target: 16 points; free/open-source tools and Stripe TEST payments only.
+
+STACK: React/Vite/TypeScript frontend, Rust/Axum API, SQLite/SQLx.
+Reuse existing cargo tests, Vitest, tracing, tower-http and /api/healthz.
+
+DEPENDENCY-RANKED FEATURES
+1. Deploy (+1): Cloudflare Pages Free (web) + Render Free (Rust API).
+2. Tests (+2): existing cargo test + pnpm test; Playwright only if needed.
+3. CI/CD (+2): GitHub Actions for build/test + automatic deploy.
+4. SEO (+1): HTML title/description, robots.txt, sitemap.xml; no package.
+5. Observability (+2): existing tracing + healthz; log errors/requests.
+6. Login (+2): axum-login + tower-sessions + Argon2; protect worker API.
+7. Security (+3): server-side permissions, input validation, cargo-audit,
+   secure sessions, rate limits; remove default admin token immediately.
+8. Payments (+3): Stripe Checkout TEST mode, Rust reqwest, webhook
+   signature verification; no real money.
+
+DEPENDENCIES
+App -> deploy + tests -> CI/CD; deploy -> SEO/observability;
+login -> authorization; security before payments. Parallelize where possible.
+
+TEAM SPLIT (150 MINUTES)
+A: Deploy + tests + CI/CD (5 pts)
+B: Login + security (5 pts)
+C: Payments + observability + SEO (6 pts)
+Run the hackathon HOT checker after EACH completed feature.
+
+ZERO-COST WARNINGS
+- Render Free sleeps and loses local SQLite data on restart: demo only,
+  NOT durable production. Keep seed data and verify before judging.
+- Use hosting-provided subdomains; no paid instances/disks/domains.
+- GitHub Actions: public-repo standard runners are free.
+- Stripe TEST transactions cost $0; live transactions do not.
+- Keep ADMIN_TOKEN/payment keys in backend environment variables.
+- Actual checker/judge criteria override these suggestions.
+
+REPO: https://github.com/michaelpog/nullbox
+PORTAL: https://orga.fasthacks.cloud/team
+
