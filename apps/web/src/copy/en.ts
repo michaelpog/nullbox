@@ -1,4 +1,6 @@
+import type { Category } from "../api/generated/Category";
 import type { ErrorCode } from "../api/generated/ErrorCode";
+import type { PreferredTime } from "../api/generated/PreferredTime";
 import type { Severity } from "../api/generated/Severity";
 import type { TicketStatus } from "../api/generated/TicketStatus";
 
@@ -9,27 +11,67 @@ import type { TicketStatus } from "../api/generated/TicketStatus";
  */
 const en = {
   app: {
-    name: "Nullbox",
-    subtitle: "Support, but make it void.",
-    nav: { submit: "Report a problem", inbox: "Worker inbox" },
+    name: "Osaka Handy Helpers",
+    subtitle: "Fixed, eventually. Probably.",
+    nav: {
+      submit: "Report a problem",
+      myTickets: "My tickets",
+      details: "My details",
+      inbox: "Handyman inbox",
+      login: "Log in",
+    },
     language: "Language",
-    footer: "No tickets were harmed in the making of this inbox.",
+    footer: "No pipes were harmed in the making of this website.",
   },
 
   status: {
-    open: "Freshly Hatched",
-    in_progress: "Being Stared At",
-    waiting_on_customer: "Ball's in Your Court",
-    resolved: "Yeeted",
-    closed: "Sent to the Shadow Realm",
+    open: "Waiting for a handyman",
+    in_progress: "Accepted",
+    waiting_on_customer: "Waiting on you",
+    resolved: "Fixed",
+    closed: "Done and dusted",
   } satisfies Record<TicketStatus, string>,
 
   severity: {
-    p1: "Everything is on fire",
-    p2: "Rage-typing",
-    p3: "My cat is now in IT",
-    p4: "Mildly inconvenienced",
+    p1: "Everything is on fire (not literally)",
+    p2: "The water is winning",
+    p3: "Annoying, this week please",
+    p4: "It can wait",
   } satisfies Record<Severity, string>,
+
+  category: {
+    plumbing: "Plumbing",
+    electrical: "Electrical",
+    gas: "Gas",
+    air_conditioning: "Air conditioning",
+    moving: "Moving",
+  } satisfies Record<Category, string>,
+  noCategory: "Other",
+
+  preferredTime: {
+    weekday_morning: "Weekday morning",
+    weekday_afternoon: "Weekday afternoon",
+    weekday_evening: "Weekday evening",
+    weekend: "Weekend",
+    any_time: "Any time",
+  } satisfies Record<PreferredTime, string>,
+
+  /** Flat-rate items per category; prices are in `data/testRates.ts`. */
+  rates: {
+    plumbing: ["Unclog a drain", "Fix a leaky tap", "Toilet repair", "Water heater check"],
+    electrical: [
+      "Replace an outlet or switch",
+      "Install a light fixture",
+      "Breaker troubleshooting",
+    ],
+    gas: [
+      "Stove or range connection",
+      "Water heater ignition check",
+      "Gas appliance safety inspection",
+    ],
+    air_conditioning: ["AC cleaning (wall unit)", "AC repair diagnosis", "AC installation"],
+    moving: ["Small move (one room)", "Heavy item move", "Furniture assembly"],
+  } satisfies Record<Category, string[]>,
 
   /** Keys come from the backend (`nullbox_domain::ANON_ANIMALS`). */
   animals: {
@@ -68,16 +110,35 @@ const en = {
 
   customer: {
     title: "What broke?",
-    intro: "Tell us everything. We read every ticket. Eventually. Probably.",
+    intro: "Tell us everything. A local handyman will accept it and send you a flat-rate invoice.",
+    kind: "What kind of problem?",
+    gasTitle: "Smell gas?",
+    gasWarning:
+      "Don't file a ticket. Open the windows, don't touch switches, leave, and call your gas company's emergency line now.",
     subject: "Subject",
-    subjectPlaceholder: "The printer is making eye contact again",
+    subjectPlaceholder: "The kitchen sink is draining at geological speed",
+    subjectHints: {
+      plumbing: "The kitchen sink is draining at geological speed",
+      electrical: "The breaker trips whenever the kettle and rice cooker meet",
+      gas: "The stove clicks but will not light",
+      air_conditioning: "The air conditioner only blows warm, damp sadness",
+      moving: "One sofa, three flights of stairs, zero elevators",
+    } satisfies Record<Category, string>,
     body: "What happened?",
-    bodyPlaceholder: "Steps to reproduce, error messages, the sound it made…",
+    bodyPlaceholder: "When it started, where in the home, the sound it made…",
+    when: "When can we come?",
+    ratesTitle: (category: string) => `${category} flat rates`,
+    ratesIntro:
+      "No surprise quotes. Once a handyman accepts, your first invoice comes from this list.",
+    ratesFooter:
+      "Bigger job? Your handyman can add items after the visit, and you approve them first.",
+    testPrices: "TEST prices",
+    yen: (amount: string) => `¥${amount}`,
     severity: "How bad is it?",
     name: "Your name (optional)",
     email: "Email (optional)",
     anonymousHint: "Skip both and you'll get a dignified anonymous alias.",
-    submit: "Send it into the void",
+    submit: "Send it to the handymen",
     submitting: "Launching…",
     createdTitle: "Ticket received!",
     createdBody: (n: number) => `Ticket #${n} is now officially somebody else's problem.`,
@@ -95,6 +156,92 @@ const en = {
     send: "Send reply",
     closedNotice: "This ticket was sent to the Shadow Realm. Please open a new one.",
     sendHint: "Ctrl + Enter to send",
+  },
+
+  myTickets: {
+    title: "My tickets",
+    tabsLabel: "Ticket status",
+    tabs: {
+      current: (n: number) => `Current · ${n}`,
+      pending: (n: number) => `Invoice pending · ${n}`,
+      paid: (n: number) => `Invoice paid · ${n}`,
+    },
+    empty: {
+      current: "Nothing broken right now. Enjoy it while it lasts.",
+      pending: "No invoices waiting.",
+      paid: "No paid invoices yet.",
+    },
+    sent: (ago: string) => `Sent ${ago}`,
+    acceptedBy: (name: string) => `Accepted by ${name}`,
+    invoiceNotIssued: "Invoice not issued yet",
+    done: "Done",
+    created: (n: number) => `Ticket #${n} is on its way to the handymen.`,
+    secretLink: "Your secret link (works on any device):",
+    deviceNote:
+      "Tickets you send from this browser show up here. Accounts are coming; until then, keep the secret link.",
+    noTickets: "You haven't reported anything from this browser yet.",
+    beastOpen: (n: string) => `${n} open`,
+    report: "Report a problem",
+  },
+
+  login: {
+    heroTitle: "Something broke?",
+    heroTitle2: "We bring the hammer.",
+    heroBody:
+      "Plumbing, electrical, gas, air conditioning and moving help across Osaka. Tell us what happened, a local handyman accepts, you pay a flat rate.",
+    heroBeastStrong: "Zero tickets.",
+    heroBeast: "The Handyman Beast is napping on its toolbox. Let's keep it that way.",
+    welcome: "Welcome back",
+    welcomeBody: "Log in to report a problem or check on an invoice.",
+    roleLabel: "I am",
+    roleCustomer: "I need help",
+    roleHandyman: "I'm a handyman",
+    handymanNote:
+      "Handymen see new tickets near them, accept the ones they want and send a flat-rate invoice.",
+    email: "Email",
+    emailPlaceholder: "you@example.jp",
+    password: "Password",
+    keepLoggedIn: "Keep me logged in",
+    forgot: "Forgot password?",
+    submit: "Log in",
+    newHere: "New here?",
+    createAccount: "Create an account",
+    preview:
+      "Preview: accounts aren't connected yet. Log in takes you straight to your tickets for now.",
+  },
+
+  details: {
+    steps: { account: "Account", details: "Your details", firstTicket: "First ticket" },
+    stepsLabel: "Sign-up progress",
+    title: "Where do we send the hammer?",
+    intro: "Your handyman sees this when they accept a ticket. You only fill it in once.",
+    aboutYou: "About you",
+    fullName: "Full name",
+    fullNamePlaceholder: "Yamada Taro",
+    phone: "Phone",
+    emailInvoices: "Email (invoices go here)",
+    handymanLanguage: "Language for your handyman",
+    languages: ["English", "日本語", "Either is fine"],
+    contact: "Best way to reach you",
+    contactOptions: ["LINE", "Phone call", "Email"],
+    yourPlace: "Your place",
+    postal: "Postal code",
+    prefecture: "Prefecture",
+    prefectures: ["Osaka", "Hyogo", "Kyoto", "Nara"],
+    city: "City / ward",
+    cityPlaceholder: "Kita-ku",
+    street: "Street address",
+    streetPlaceholder: "Umeda 1-2-3",
+    building: "Building and room",
+    buildingPlaceholder: "Sakura Mansion 402",
+    placeType: "Type of place",
+    placeTypes: ["Apartment", "House", "Shop or office"],
+    gettingIn: "Getting in",
+    gettingInPlaceholder: "Auto-lock? Pets? Where can the van park?",
+    consent: "I agree that my address is shared only with the handyman who accepts my ticket.",
+    back: "Back",
+    save: "Save and report a problem",
+    preview: "Preview: these details aren't saved yet. They will be once accounts exist.",
   },
 
   worker: {
@@ -123,12 +270,19 @@ const en = {
   },
 
   beast: {
-    title: "Backlog Beast",
+    title: "Handyman Beast",
     moods: {
-      asleep: "Asleep. Do not wake it.",
-      peckish: "Peckish. It has noticed you.",
-      grumpy: "Grumpy. Snacks recommended.",
-      kaiju: "KAIJU MODE. Evacuate the city.",
+      asleep: "Inbox zero. Napping on the toolbox.",
+      peckish: "On the job. Humming while it works.",
+      grumpy: "Grumbling. Tightening bolts too hard.",
+      kaiju: "Hammer raised. Nobody is safe.",
+    },
+    /** Spoken by screen readers: describes the drawing, not the joke. */
+    labels: {
+      asleep: "Handyman Beast, happy and napping",
+      peckish: "Handyman Beast, busy and focused",
+      grumpy: "Handyman Beast, grumpy and steaming",
+      kaiju: "Handyman Beast, furious with hammer raised",
     },
     openCount: (n: string) => `${n} open`,
     oldest: (age: string) => `Oldest: ${age}`,
