@@ -1,0 +1,17 @@
+# Plain HTTP on port 80. For HTTPS, replace ":80" with the server's domain name
+# (team-01.fasthacks.cloud) and open ports 80 and 443: Caddy gets the certificate itself.
+:80 {
+	encode gzip
+
+	# API requests go to the API container.
+	handle /api/* {
+		reverse_proxy nullbox-api:3000
+	}
+
+	# Everything else is the web app; unknown paths get index.html so React Router handles them.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}
