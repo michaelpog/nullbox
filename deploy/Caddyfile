@@ -1,6 +1,8 @@
-# Plain HTTP on port 80. For HTTPS, replace ":80" with the server's domain name
-# (team-01.fasthacks.cloud) and open ports 80 and 443: Caddy gets the certificate itself.
-:80 {
+# SITE_ADDRESS decides HTTP or HTTPS:
+#   a domain (team-01.fasthacks.cloud): HTTPS. Caddy gets and renews a free Let's Encrypt
+#     certificate by itself and redirects http:// to https://. Needs ports 80 and 443 open.
+#   ":80" (the default): plain HTTP.
+{$SITE_ADDRESS::80} {
 	encode gzip
 
 	# API requests go to the API container.
@@ -14,4 +16,12 @@
 		try_files {path} /index.html
 		file_server
 	}
+}
+
+# Health check for the deploy workflow, reachable only inside the container.
+:8081 {
+	handle /api/healthz {
+		reverse_proxy nullbox-api:3000
+	}
+	respond 404
 }
