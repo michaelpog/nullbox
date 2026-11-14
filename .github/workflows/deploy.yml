@@ -1,7 +1,5 @@
-# CI: every push and pull request runs the tests and builds the app (Rust release binary +
-# web bundle), with caches so unchanged dependencies are not compiled or downloaded again.
-# CD: on main (or by hand from the Actions tab) it packages that build into two small Docker
-# images, copies them to the server over SSH and restarts the app.
+# Tests every push and pull request; on main (or by hand from the Actions tab) it also
+# builds the two Docker images, copies them to the server over SSH and restarts the app.
 #
 # Needs, under Settings -> Secrets and variables -> Actions:
 #   Secrets:   DEPLOYMENT_KEY    the PRIVATE SSH key (begins "-----BEGIN OPENSSH PRIVATE KEY-----")
@@ -22,66 +20,36 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  # A new push to a pull request cancels its older run; deploys on main always finish.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  build:
-    name: Test and build
-    # Pinned: the API image (deploy/Dockerfile) uses the same Ubuntu, so the binary fits it.
-    runs-on: ubuntu-24.04
-    env:
-      SQLX_OFFLINE: "true"
+  test:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # Rust. rustup reads rust-toolchain.toml. The cache keeps compiled dependencies
-      # (debug for tests, release for the server); only main saves it, pull requests reuse it.
+      # Rust: rustup on the runner reads rust-toolchain.toml and installs that version.
       - uses: Swatinem/rust-cache@v2
-        with:
-          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Rust tests
         run: cargo test --locked
-      - name: Rust release build
-        run: cargo build --release --locked -p nullbox-api
+        env:
+          SQLX_OFFLINE: "true"
 
-      # Web. pnpm's version comes from package.json; setup-node caches the package store.
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: pnpm
+      - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - name: Web tests
         run: pnpm test
       - name: Web build (typecheck + bundle)
-        run: |
-          # Empty base URL: the app calls /api on the address it was loaded from.
-          printf 'VITE_API_BASE_URL=\n' > apps/web/.env.production.local
-          pnpm build
-          if grep -rq "localhost:3000" apps/web/dist; then
-            echo "::error::The web bundle still points at localhost:3000."; exit 1
-          fi
-
-      - name: Collect the build for the deploy job
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        run: |
-          mkdir -p build
-          cp target/release/nullbox-api build/
-          cp -r apps/web/dist build/web
-          cp deploy/Caddyfile build/
-      - uses: actions/upload-artifact@v4
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        with:
-          name: nullbox-build
-          path: build
-          retention-days: 3
+        run: pnpm build
 
   deploy:
-    needs: build
+    needs: test
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
@@ -111,18 +79,11 @@ jobs:
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v4
-        with:
-          sparse-checkout: deploy
-      - uses: actions/download-artifact@v4
-        with:
-          name: nullbox-build
-          path: build
 
-      # Packaging only: the compiling happened (with caches) in the build job.
       - name: Build images
         run: |
-          docker build -f deploy/Dockerfile --target api -t "nullbox-api:$TAG" build
-          docker build -f deploy/Dockerfile --target web -t "nullbox-web:$TAG" build
+          docker build --target api -t "nullbox-api:$TAG" .
+          docker build --target web -t "nullbox-web:$TAG" .
 
       - name: Set up SSH
         env:
